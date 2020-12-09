@@ -9,8 +9,7 @@ start_row=6
 
 # https://juejin.im/post/5c57afb1f265da2dda6924a1
 # 处理用户名-分割数字和其他。
-nowdir = os.walk("./")
-for path,dir_list,file_list in nowdir:
+for path,dir_list,file_list in os.walk("./"):
     for file_name in file_list:
         if not file_name.endswith(".xlsx"):
             ss = [''.join(list(g)) for k, g in groupby(file_name, key=lambda x: x.isdigit())]
@@ -105,30 +104,50 @@ for path, pathlist, filelist in os.walk('./'):
     for img in filelist:
         mid.append(img)
         i+=1
-        if i%2 == 0:
+        if i%200 == 0:
             imgs.append(mid)
             mid=[]
     imgs.append(mid)
 
 for i in range(0,len(imgs)):
-    xlsname='faceup'+str(i)+'.xlsx'
+    # every 200 imgs create a new excel and new dir
     subimg=imgs[i]
+    xlsname='faceup'+str(i)+'.xlsx'
     wb=openpyxl.Workbook()
     ws=wb.active
     startrow=1
     newdir=os.path.join(os.getcwd(),str(i))
     os.makedirs(newdir)
     for j in range(0,len(subimg)):
-        img=subimg[j]
-        phone=img.strip().split('-')[0]
-        name=img.strip().split('-')[1].split('.')[0]
+        phone=subimg[j].strip().split('-')[0]
+        name=subimg[j].strip().split('-')[1]
+        #处理 -不考勤情况
+        if '.' in name:
+            name=name.split('.')[0]
         newname=phone+'.jpg'
-        os.rename(img,newname)
+        os.rename(subimg[j],newname)
+        shutil.move(os.getcwd()+'/'+newname,newdir+'/'+newname)
         ws.cell(startrow,1).value=name
         ws.cell(startrow,5).value=phone 
         startrow+=1
-        shutil.move(os.getcwd()+'/'+newname,newdir+'/'+newname)
     wb.save(xlsname)
+    wb.close()
 
+# 处理和亨和包食堂照片
+wb=openpyxl.Workbook()
+ws=wb.active
+start_row=1
+
+for _,_,file_list in os.walk("./"):
+    for file_name in file_list:
+        if not file_name.endswith(".xlsx"):
+            ss = [''.join(list(g)) for k, g in groupby(file_name, key=lambda x: x.isdigit())]
+            picext=ss[2]
+            ws.cell(start_row,1).value=ss[0]
+            ws.cell(start_row,5).value=ss[1]
+            os.rename(file_name,ss[1]+picext)
+            start_row+=1
+
+wb.save("faceup-and.xlsx")
 
 
