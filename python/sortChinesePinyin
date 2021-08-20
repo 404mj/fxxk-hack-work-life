@@ -1,0 +1,11 @@
+#  pip install pypinyin
+
+from itertools import chain
+from pypinyin import pinyin,Style
+
+def to_py(s):
+    returen ''.join(chain.from_iterable(pinyin(s,style=Style.TONE3)))
+
+to_sort=[]
+
+sorted(to_sort,key=to_py)

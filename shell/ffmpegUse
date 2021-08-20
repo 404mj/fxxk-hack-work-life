@@ -1,0 +1,2 @@
+#批量转换flac文件为mp3
+find . -name *.flac -exec ffmpeg -i {} -ab 512k -map_metadata 0 -id3v2_version 3 {}.mp3 \;
